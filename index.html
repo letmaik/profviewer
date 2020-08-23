@@ -44,21 +44,20 @@ html, body {
 
 </div>
 
-<!-- TODO use modules once https://github.com/jspm/project/issues/75 is fixed -->
-<script src="//d3js.org/d3.v5.min.js"></script>
-<script src="https://unpkg.com/@hpcc-js/wasm@0.3.11/dist/index.min.js"></script>
-<script src="https://unpkg.com/d3-graphviz@3.0.5/build/d3-graphviz.js"></script>
-
 <script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@0.5.0/dist/es-module-shims.min.js"></script>
 <script type="importmap-shim">
 {
     "imports": {
-        "d3": "https://jspm.dev/d3@5.16.0",
         "d3-graphviz": "https://jspm.dev/d3-graphviz@3.0.4"
     },
     "scopes": {
     }
 }
+</script>
+
+<script>
+// Work-around for https://github.com/jspm/project/issues/75.
+window.__hpcc_wasmFolder = 'https://unpkg.com/@hpcc-js/wasm@0.3.14/dist/'
 </script>
 
 <script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>

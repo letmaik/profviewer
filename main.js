@@ -1,6 +1,4 @@
-// TODO use modules once https://github.com/jspm/project/issues/75 is fixed
-//import * as d3 from "d3";
-//import { graphviz } from 'd3-graphviz';
+import { graphviz } from 'd3-graphviz';
 
 export function main() {
     registerHandlers();
@@ -28,8 +26,7 @@ function registerHandlers() {
 }
 
 function renderDot(dot) {
-    d3.select("#graph")
-        .graphviz()
+    graphviz("#graph")
         .options({width: 800, height: 600, zoomScaleExtent: [0.1, 100], fit: true})
         .renderDot(dot);
 }
