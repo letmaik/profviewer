@@ -73,7 +73,7 @@ async function bootstrap() {
     // Load additional wheels from PyPI / custom URLs.
     await pyodide.runPythonAsync(`
         import micropip
-        micropip.install('${window.location.origin}/wheels/gprof2dot-2019.11.30-py3-none-any.whl')
+        micropip.install('${window.location.href}wheels/gprof2dot-2019.11.30-py3-none-any.whl')
     `);
     
     // Start the app.
