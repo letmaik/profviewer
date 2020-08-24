@@ -33,7 +33,17 @@ function getProfileFormat() {
     return format;
 }
 
+function showButtonsForCurrentProfileFormat() {
+    const isPstats = getProfileFormat() == 'pstats';
+    $('#pstats-table-btn').style.display = isPstats ? '' : 'none';
+}
+
 function registerHandlers() {
+    $('#profile-format').addEventListener('change', () => {
+        showButtonsForCurrentProfileFormat();
+    });
+    showButtonsForCurrentProfileFormat();
+
     $('#gprof2dot-btn').addEventListener('click', async () => {
         const file = await readProfileFile();
         if (!file)
