@@ -6,13 +6,26 @@ html, body {
     width: 90%;
     height: 90%;
 }
+#container {
+    display: none;
+}
 #graph {
+    display: none;
     border: 2px solid blue;
     width: 800px;
     height: 600px;
 }
-#container {
+#table {
     display: none;
+}
+table thead {
+    background-color:#eee;
+    color:#666666;
+    font-weight: bold;
+    cursor: default;
+}
+table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
+    content: " \25B4\25BE" 
 }
 </style>
 </head>
@@ -39,10 +52,16 @@ html, body {
         <option value="dtrace">DTrace</option>
     </select>
     <button id="gprof2dot-btn">gprof2dot</button>
+    <button id="pstats-table-btn">pstats table</button>
 
     <div id="graph"></div>
 
+    <table id="table"></table>
+
 </div>
+
+<!-- TODO find something available as cjs/es module -->
+<script src="https://cdn.jsdelivr.net/npm/sorttable@1.0.2/sorttable.min.js"></script>
 
 <script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@0.5.0/dist/es-module-shims.min.js"></script>
 <script type="importmap-shim">
@@ -63,7 +82,7 @@ window.__hpcc_wasmFolder = 'https://unpkg.com/@hpcc-js/wasm@0.3.14/dist/'
 <script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>
 
 <script type="module-shim">
-import { main } from "./main.js";
+import { main } from "./js/main.js";
 
 async function bootstrap() {
     // Wait for pyodide to initialize.
