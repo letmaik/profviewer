@@ -10,11 +10,11 @@ Features:
 - Graphviz rendering via [d3-graphviz](https://github.com/magjac/d3-graphviz), also powered by WebAssembly.
 - Sortable table for pstats (Python) profiles.
 - Zipped profiles via [JSZip](https://github.com/Stuk/jszip).
+- Profiles from URLs (e.g. from [GitHub issue](https://github.com/letmaik/profviewer/issues/1) attachments).
 
 Future ideas:
 - Table display for more profile formats
 - Flamegraphs
-- Load profile files from URL for sharing (e.g. from GitHub issue attachment)
 
 ## Development
 
