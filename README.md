@@ -9,12 +9,12 @@ Features:
 - [gprof2dot](https://github.com/jrfonseca/gprof2dot) integration via [pyodide](https://github.com/iodide-project/pyodide), powered by WebAssembly.
 - Graphviz rendering via [d3-graphviz](https://github.com/magjac/d3-graphviz), also powered by WebAssembly.
 - Sortable table for pstats (Python) profiles.
+- Zipped profiles via [JSZip](https://github.com/Stuk/jszip).
 
 Future ideas:
 - Table display for more profile formats
 - Flamegraphs
 - Load profile files from URL for sharing (e.g. from GitHub issue attachment)
-- Support zipped profile files (mostly for GitHub issue attachments)
 
 ## Development
 

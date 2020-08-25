@@ -1,4 +1,5 @@
 import { graphviz } from 'd3-graphviz';
+import JSZip from 'jszip';
 
 function $(selector) {
     return document.querySelector(selector);
@@ -16,7 +17,7 @@ async function readProfileFile() {
         return;
     const reader = new FileReader();
     reader.readAsArrayBuffer(file);
-    return new Promise((resolve, reject) => {
+    let buf = await new Promise((resolve, reject) => {
         reader.onload = evt => {
             resolve(evt.target.result);
         };
@@ -25,6 +26,15 @@ async function readProfileFile() {
             reject(reader.error);
         };
     });
+    if (file.name.endsWith('.zip')) {
+        const zip = await JSZip.loadAsync(file);
+        const paths = Object.keys(zip.files);
+        if (paths.length > 1) {
+            window.alert('Warning: ZIP archive contains more than one file, trying a random one');
+        }
+        buf = await zip.files[paths[0]].async('arraybuffer');
+    }
+    return buf;
 }
 
 function getProfileFormat() {
