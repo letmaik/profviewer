@@ -159,7 +159,7 @@ function registerHandlers() {
 async function renderDot(dot) {
     await new Promise(resolve => {
         graphviz("#graph")
-            .options({width: 800, height: 600, zoomScaleExtent: [0.1, 100], fit: true})
+            .options({width: '100%', height: 600, zoomScaleExtent: [0.1, 100], fit: true})
             .renderDot(dot, resolve);
     })
     $('#graph').style.display = 'block';
