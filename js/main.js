@@ -1,6 +1,8 @@
 import { graphviz } from 'd3-graphviz';
 import JSZip from 'jszip';
 
+const CORSProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+
 function $(selector) {
     return document.querySelector(selector);
 }
@@ -29,14 +31,21 @@ async function readProfileFromUrl() {
     const url = getProfileUrl();
     if (!url)
         return;
-    const response = await fetch(url);
+    let response;
+    try {
+        response = await fetch(url);
+    } catch (e) {
+        console.log(e);
+        console.log('Retrying with CORS proxy')
+        response = await fetch(CORSProxyUrl + url);
+    }
     if (!response.ok) {
         window.alert(`Could not load profile from ${url}: ${response.status} ${response.statusText}`)
         return;
     }
-    const buf = await response.arrayBuffer();
+    let buf = await response.arrayBuffer();
     if (url.endsWith('.zip')) {
-        buf = await unzip(file);
+        buf = await unzip(buf);
     }
     return buf;
 }
