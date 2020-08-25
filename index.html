@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <style>
 html, body {
     width: 90%;
@@ -8,6 +9,9 @@ html, body {
 }
 #container {
     display: none;
+}
+#profile-url {
+    width: 400px;
 }
 #graph {
     display: none;
@@ -32,27 +36,34 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
 <body>
 
 <div id="loading">
-    Please wait...
+    Loading... <span id="loading-progress">10</span>%
 </div>
 
 <div id="container">
 
-    <input type="file" id="profile-file" />
-    <select id="profile-format">
-        <option value="axe">AXE</option>
-        <option value="callgrind">Callgrind</option>
-        <option value="hprof">HProf</option>
-        <option value="oprofile">OProfile</option>
-        <option value="perf">Perf</option>
-        <option value="prof">Gprof</option>
-        <option value="pstats">pstats (Python)</option>
-        <option value="sleepy">Sleepy</option>
-        <option value="sysprof">Sysprof</option>
-        <option value="xperf">XPerf</option>
-        <option value="dtrace">DTrace</option>
-    </select>
-    <button id="gprof2dot-btn">gprof2dot</button>
-    <button id="pstats-table-btn">pstats table</button>
+    <table>
+        <tr><td>Local file:</td><td><input type="file" id="profile-file" /></td></tr>
+        <tr><td>URL:</td><td><input type="url" id="profile-url" /></td></tr>
+        <tr><td>Format:</td><td>
+            <select id="profile-format">
+                <option value="axe">AXE</option>
+                <option value="callgrind">Callgrind</option>
+                <option value="hprof">HProf</option>
+                <option value="oprofile">OProfile</option>
+                <option value="perf">Perf</option>
+                <option value="prof">Gprof</option>
+                <option value="pstats">pstats (Python)</option>
+                <option value="sleepy">Sleepy</option>
+                <option value="sysprof">Sysprof</option>
+                <option value="xperf">XPerf</option>
+                <option value="dtrace">DTrace</option>
+            </select>
+        </td></tr>
+        <tr><td>Tools:</td><td>
+            <button id="gprof2dot-btn">gprof2dot</button>
+            <button id="pstats-table-btn">pstats table</button>
+        </td></tr>
+    </table>
 
     <div id="graph"></div>
 
@@ -86,13 +97,18 @@ window.__hpcc_wasmFolder = 'https://unpkg.com/@hpcc-js/wasm@0.3.14/dist/'
 import { main } from "./js/main.js";
 
 async function bootstrap() {
+    const progressEl = document.getElementById('loading-progress');
+    progressEl.innerHTML = '20';
+
     // Wait for pyodide to initialize.
     await languagePluginLoader;
+    progressEl.innerHTML = '50';
 
     // Load additional wheels from PyPI / custom URLs.
+    const baseUrl = window.location.origin + window.location.pathname;
     await pyodide.runPythonAsync(`
         import micropip
-        micropip.install('${window.location.href}wheels/gprof2dot-2019.11.30-py3-none-any.whl')
+        micropip.install('${baseUrl}wheels/gprof2dot-2019.11.30-py3-none-any.whl')
     `);
     
     // Start the app.

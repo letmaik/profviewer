@@ -9,9 +9,39 @@ export function main() {
     registerHandlers();
     $('#loading').style.display = 'none';
     $('#container').style.display = 'block';
+
+    const params = new URLSearchParams(window.location.search);
+
+    const profileUrl = params.get('url');
+    if (profileUrl) {
+        setProfileUrl(profileUrl);
+    }
+
+    const format = params.get('format');
+    if (format) {
+        setProfileFormat(format);
+    }
+
+    showButtonsForCurrentProfileFormat();
 }
 
-async function readProfileFile() {
+async function readProfileFromUrl() {
+    const url = getProfileUrl();
+    if (!url)
+        return;
+    const response = await fetch(url);
+    if (!response.ok) {
+        window.alert(`Could not load profile from ${url}: ${response.status} ${response.statusText}`)
+        return;
+    }
+    const buf = await response.arrayBuffer();
+    if (url.endsWith('.zip')) {
+        buf = await unzip(file);
+    }
+    return buf;
+}
+
+async function readProfileFromFile() {
     const file = $('#profile-file').files[0];
     if (!file)
         return;
@@ -27,20 +57,45 @@ async function readProfileFile() {
         };
     });
     if (file.name.endsWith('.zip')) {
-        const zip = await JSZip.loadAsync(file);
-        const paths = Object.keys(zip.files);
-        if (paths.length > 1) {
-            window.alert('Warning: ZIP archive contains more than one file, trying a random one');
-        }
-        buf = await zip.files[paths[0]].async('arraybuffer');
+        buf = await unzip(file);
     }
     return buf;
 }
 
+async function readProfile() {
+    let buf = await readProfileFromFile();
+    if (buf)
+        return buf;
+    buf = await readProfileFromUrl();
+    if (buf)
+        return buf;
+    window.alert('File/URL missing');
+    throw Error('file/url missing');
+}
+
+async function unzip(buf) {
+    const zip = await JSZip.loadAsync(buf);
+    const paths = Object.keys(zip.files);
+    if (paths.length > 1) {
+        window.alert('Warning: ZIP archive contains more than one file, trying a random one');
+    }
+    return await zip.files[paths[0]].async('arraybuffer');
+}
+
 function getProfileFormat() {
-    const formatEl = $('#profile-format');
-    const format = formatEl.options[formatEl.selectedIndex].value;
-    return format;
+    return $('#profile-format').value;
+}
+
+function setProfileFormat(format) {
+    $('#profile-format').value = format;
+}
+
+function getProfileUrl() {
+    return $('#profile-url').value;
+}
+
+function setProfileUrl(url) {
+    $('#profile-url').value = url;
 }
 
 function showButtonsForCurrentProfileFormat() {
@@ -52,22 +107,17 @@ function registerHandlers() {
     $('#profile-format').addEventListener('change', () => {
         showButtonsForCurrentProfileFormat();
     });
-    showButtonsForCurrentProfileFormat();
 
     $('#gprof2dot-btn').addEventListener('click', async () => {
-        const file = await readProfileFile();
-        if (!file)
-            return;
+        const buf = await readProfile();
         const format = getProfileFormat();
-        const dot = await gprof2dot(file, format);
+        const dot = await gprof2dot(buf, format);
         renderDot(dot);
     });
 
     $('#pstats-table-btn').addEventListener('click', async () => {
-        const file = await readProfileFile();
-        if (!file)
-            return;
-        const pstats = await readPstats(file);
+        const buf = await readProfile();
+        const pstats = await readPstats(buf);
         renderTable(pstats);
     });
 }
