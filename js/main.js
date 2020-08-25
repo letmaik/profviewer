@@ -103,9 +103,26 @@ function showButtonsForCurrentProfileFormat() {
     $('#pstats-table-btn').style.display = isPstats ? '' : 'none';
 }
 
+function updateLocation() {
+    const profileUrl = getProfileUrl();
+    const profileFormat = getProfileFormat();
+    
+    const baseUrl = window.location.origin + window.location.pathname;
+    let url = baseUrl;
+    if (profileUrl) {
+        url = `?url=${profileUrl}&format=${profileFormat}`;
+    }
+    window.history.replaceState({}, '', url);
+}
+
 function registerHandlers() {
+    $('#profile-url').addEventListener('input', () => {
+        updateLocation();
+    });
+
     $('#profile-format').addEventListener('change', () => {
         showButtonsForCurrentProfileFormat();
+        updateLocation();
     });
 
     $('#gprof2dot-btn').addEventListener('click', async () => {
