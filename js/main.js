@@ -124,6 +124,10 @@ function updateLocation() {
     window.history.replaceState({}, '', url);
 }
 
+function setToolBusy(busy) {
+    $('#tool-progress').innerHTML = busy ? '⏳' : '';
+}
+
 function registerHandlers() {
     $('#profile-url').addEventListener('input', () => {
         updateLocation();
@@ -135,23 +139,29 @@ function registerHandlers() {
     });
 
     $('#gprof2dot-btn').addEventListener('click', async () => {
+        setToolBusy(true);
         const buf = await readProfile();
         const format = getProfileFormat();
         const dot = await gprof2dot(buf, format);
-        renderDot(dot);
+        await renderDot(dot);
+        setToolBusy(false);
     });
 
     $('#pstats-table-btn').addEventListener('click', async () => {
+        setToolBusy(true);
         const buf = await readProfile();
         const pstats = await readPstats(buf);
         renderTable(pstats);
+        setToolBusy(false);
     });
 }
 
-function renderDot(dot) {
-    graphviz("#graph")
-        .options({width: 800, height: 600, zoomScaleExtent: [0.1, 100], fit: true})
-        .renderDot(dot);
+async function renderDot(dot) {
+    await new Promise(resolve => {
+        graphviz("#graph")
+            .options({width: 800, height: 600, zoomScaleExtent: [0.1, 100], fit: true})
+            .renderDot(dot, resolve);
+    })
     $('#graph').style.display = 'block';
 }
 
