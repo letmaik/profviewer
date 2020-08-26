@@ -56,7 +56,8 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
         </td></tr>
         <tr><td>Tools:</td><td>
             <button id="gprof2dot-btn">gprof2dot</button>
-            <button id="pstats-table-btn">pstats table</button>
+            <button id="flameprof-btn">flameprof</button>
+            <button id="table-btn">table</button>
             <span id="tool-progress"></span>
         </td></tr>
     </table>
@@ -105,6 +106,7 @@ async function bootstrap() {
     await pyodide.runPythonAsync(`
         import micropip
         micropip.install('${baseUrl}wheels/gprof2dot-2019.11.30-py3-none-any.whl')
+        micropip.install('${baseUrl}wheels/flameprof-0.4-py3-none-any.whl')
     `);
     
     // Start the app.

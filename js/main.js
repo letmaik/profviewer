@@ -109,7 +109,8 @@ function setProfileUrl(url) {
 
 function showButtonsForCurrentProfileFormat() {
     const isPstats = getProfileFormat() == 'pstats';
-    $('#pstats-table-btn').style.display = isPstats ? '' : 'none';
+    $('#table-btn').style.display = isPstats ? '' : 'none';
+    $('#flameprof-btn').style.display = isPstats ? '' : 'none';
 }
 
 function updateLocation() {
@@ -147,13 +148,32 @@ function registerHandlers() {
         setToolBusy(false);
     });
 
-    $('#pstats-table-btn').addEventListener('click', async () => {
+    $('#flameprof-btn').addEventListener('click', async () => {
+        if (getProfileFormat() != 'pstats') {
+            throw Error('table only supported for pstats');
+        }
+        setToolBusy(true);
+        const buf = await readProfile();
+        const svg = await flameprof(buf);
+        renderSvg(svg);
+        setToolBusy(false);
+    });
+
+    $('#table-btn').addEventListener('click', async () => {
+        if (getProfileFormat() != 'pstats') {
+            throw Error('table only supported for pstats');
+        }
         setToolBusy(true);
         const buf = await readProfile();
         const pstats = await readPstats(buf);
         renderTable(pstats);
         setToolBusy(false);
     });
+}
+
+function renderSvg(svg) {
+    $('#graph').innerHTML = svg;
+    $('#graph').style.display = 'block';
 }
 
 async function renderDot(dot) {
@@ -200,6 +220,40 @@ async function gprof2dot(buf, format) {
         return dot;
     } catch (e) {
         window.alert('Error running gprof2dot:\n\n' + e.message)
+        throw e;
+    } finally {
+        delete window.prof_buf;
+    }
+}
+
+async function flameprof(buf) {
+    try {
+        window.prof_buf = buf;
+        const svg = await pyodide.runPythonAsync(`
+            from tempfile import NamedTemporaryFile
+            import io
+            import pstats
+            import flameprof
+            from js import prof_buf
+
+            with NamedTemporaryFile('w+b') as f_in:
+                f_in.write(prof_buf)
+                f_in.flush()
+
+                s = pstats.Stats(f_in.name)
+
+                result = io.StringIO()
+                flameprof.render(
+                    s.stats, result, 'svg', flameprof.DEFAULT_THRESHOLD / 100,
+                    flameprof.DEFAULT_WIDTH, flameprof.DEFAULT_ROW_HEIGHT,
+                    flameprof.DEFAULT_FONT_SIZE, flameprof.DEFAULT_LOG_MULT)
+
+            svg = result.getvalue()
+            svg
+        `);
+        return svg;
+    } catch (e) {
+        window.alert('Error running flameprof:\n\n' + e.message)
         throw e;
     } finally {
         delete window.prof_buf;

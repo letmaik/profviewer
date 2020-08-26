@@ -1,11 +1,15 @@
 #!/bin/bash
 set -ex
 
-rm -rf *.whl tmp
+rm -rf tmp
 mkdir tmp
 cd tmp
 
-# gprof2dot is not yet published as wheel.
+# Packages that are not yet published as wheel.
 git clone -b 2019.11.30 https://github.com/jrfonseca/gprof2dot.git --depth 1
-cd gprof2dot
-pip3 wheel -w ../.. .
+git clone -b 0.4 https://github.com/baverman/flameprof.git --depth 1
+
+pip3 wheel -w . gprof2dot/
+pip3 wheel -w . flameprof/
+
+cp -n *.whl ..
