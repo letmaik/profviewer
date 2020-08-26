@@ -141,11 +141,14 @@ function registerHandlers() {
 
     $('#gprof2dot-btn').addEventListener('click', async () => {
         setToolBusy(true);
-        const buf = await readProfile();
-        const format = getProfileFormat();
-        const dot = await gprof2dot(buf, format);
-        await renderDot(dot);
-        setToolBusy(false);
+        try {
+            const buf = await readProfile();
+            const format = getProfileFormat();
+            const dot = await gprof2dot(buf, format);
+            await renderDot(dot);
+        } finally {
+            setToolBusy(false);
+        }
     });
 
     $('#flameprof-btn').addEventListener('click', async () => {
@@ -153,10 +156,13 @@ function registerHandlers() {
             throw Error('table only supported for pstats');
         }
         setToolBusy(true);
-        const buf = await readProfile();
-        const svg = await flameprof(buf);
-        renderSvg(svg);
-        setToolBusy(false);
+        try {
+            const buf = await readProfile();
+            const svg = await flameprof(buf);
+            renderSvg(svg);
+        } finally {
+            setToolBusy(false);
+        }
     });
 
     $('#table-btn').addEventListener('click', async () => {
@@ -164,10 +170,13 @@ function registerHandlers() {
             throw Error('table only supported for pstats');
         }
         setToolBusy(true);
-        const buf = await readProfile();
-        const pstats = await readPstats(buf);
-        renderTable(pstats);
-        setToolBusy(false);
+        try {
+            const buf = await readProfile();
+            const pstats = await readPstats(buf);
+            renderTable(pstats);
+        } finally {
+            setToolBusy(false);
+        }
     });
 }
 
