@@ -7,9 +7,9 @@ An experiment for viewing runtime profiles online in a fully static website.
 Features:
 - Profile files are not uploaded but locally read.
 - [gprof2dot](https://github.com/jrfonseca/gprof2dot) and [flameprof](https://github.com/baverman/flameprof) integration via [pyodide](https://github.com/iodide-project/pyodide), powered by WebAssembly.
-- Graphviz rendering via [d3-graphviz](https://github.com/magjac/d3-graphviz), also powered by WebAssembly.
+- [FlameGraph](https://github.com/brendangregg/FlameGraph) integration via [WebPerl](https://github.com/haukex/webperl), powered by WebAssembly.
+- Graphviz rendering via [d3-graphviz](https://github.com/magjac/d3-graphviz), powered by WebAssembly.
 - Sortable table for pstats (Python) profiles.
-- Flame graphs for pstats (Python) profiles via [flameprof](https://github.com/baverman/flameprof), [FlameGraph](https://github.com/brendangregg/FlameGraph), and [WebPerl](https://github.com/haukex/webperl).
 - Load zipped profiles via [JSZip](https://github.com/Stuk/jszip).
 - Load profiles from URLs (e.g. from [GitHub issue](https://github.com/letmaik/profviewer/issues/1) attachments).
 
