@@ -19,15 +19,15 @@ Future ideas:
 
 ## Limitations
 
-### pstats (Python) profiles
+### pstats profiles
 
 Python does not guarantee file compatibility for cProfile/profile files between Python versions or operating systems. The current pyodide version uses Python 3.7. If the profile can't be read, then "ValueError: bad marshal data (unknown type code)" will be shown.
 
-### flameprof (for pstats profiles)
+### flameprof
 
 Running [flameprof](https://github.com/baverman/flameprof) will error with ["maximum recursion depth exceeded"](https://github.com/iodide-project/pyodide/issues/346#issuecomment-680689869) for bigger profiles. This is because it [relies on recursion](https://github.com/baverman/flameprof/blob/df94267b78028b88234a64c21d88d046217ba72e/flameprof.py#L144-L150) which in pyodide relies on JavaScript recursion. Since one Python call translates to multiple JavaScript call frames, the effective browser limit (Firefox ~439, Chrome ~315) is much lower than for regular Python (1000). Ideally, flameprof should be fixed as it seems likely that it may also fail for bigger profiles on regular Python.
 
-### FlameGraph (for pstats profiles)
+### FlameGraph
 
 [FlameGraph](https://github.com/brendangregg/FlameGraph) is a Perl script which is run via [WebPerl](https://github.com/haukex/webperl). Unfortunately, WebPerl currently has the limitation that it can only be run once, there is no way to restart the interpreter. That means, if the FlameGraph button is pressed again, an error is shown explaining that.
 The demo pages of WebPerl work around that by using IFrames, but for this experimental project it's not worth the effort.

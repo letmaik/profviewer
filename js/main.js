@@ -112,7 +112,7 @@ function showButtonsForCurrentProfileFormat() {
     const isPstats = getProfileFormat() == 'pstats';
     $('#table-btn').style.display = isPstats ? '' : 'none';
     $('#flameprof-btn').style.display = isPstats ? '' : 'none';
-    $('#flameprof-flamegraph-btn').style.display = isPstats ? '' : 'none';
+    $('#flamegraph-btn').style.display = isPstats ? '' : 'none';
 }
 
 function updateLocation() {
@@ -167,14 +167,16 @@ function registerHandlers() {
         }
     });
 
-    $('#flameprof-flamegraph-btn').addEventListener('click', async () => {
-        if (getProfileFormat() != 'pstats') {
-            throw Error('flameprof+FlameGraph only supported for pstats');
-        }
+    $('#flamegraph-btn').addEventListener('click', async () => {
         setToolBusy(true);
         try {
             const buf = await readProfile();
-            const log = await flameprof(buf, 'log');
+            let log;
+            if (getProfileFormat() == 'pstats') {
+                log = await flameprof(buf, 'log');
+            } else {
+                throw Error('FlameGraph only supported for pstats currently');
+            }
             const svg = await flamegraph(log);
             // The SVG is not "clean" and only really works on a separate page.
             renderIframe('#graph', svg);
@@ -322,7 +324,7 @@ async function flamegraph(log) {
                 console.log(str);
             }
         };
-        const logPath = '/tmp/stats.log';
+        const logPath = '/tmp/profile.log';
         const plPath = '/tmp/flamegraph.pl';
         FS.writeFile(logPath, log);
         FS.writeFile(plPath, pl);
