@@ -2,6 +2,7 @@ import { graphviz } from 'd3-graphviz';
 import JSZip from 'jszip';
 
 const CORSProxyUrl = 'https://cors-anywhere.herokuapp.com/';
+const FlameGraphPlUrl = 'https://raw.githubusercontent.com/brendangregg/FlameGraph/master/flamegraph.pl';
 
 function $(selector) {
     return document.querySelector(selector);
@@ -111,6 +112,7 @@ function showButtonsForCurrentProfileFormat() {
     const isPstats = getProfileFormat() == 'pstats';
     $('#table-btn').style.display = isPstats ? '' : 'none';
     $('#flameprof-btn').style.display = isPstats ? '' : 'none';
+    $('#flameprof-flamegraph-btn').style.display = isPstats ? '' : 'none';
 }
 
 function updateLocation() {
@@ -153,13 +155,29 @@ function registerHandlers() {
 
     $('#flameprof-btn').addEventListener('click', async () => {
         if (getProfileFormat() != 'pstats') {
-            throw Error('table only supported for pstats');
+            throw Error('flameprof only supported for pstats');
         }
         setToolBusy(true);
         try {
             const buf = await readProfile();
-            const svg = await flameprof(buf);
+            const svg = await flameprof(buf, 'svg');
             renderSvg(svg);
+        } finally {
+            setToolBusy(false);
+        }
+    });
+
+    $('#flameprof-flamegraph-btn').addEventListener('click', async () => {
+        if (getProfileFormat() != 'pstats') {
+            throw Error('flameprof+FlameGraph only supported for pstats');
+        }
+        setToolBusy(true);
+        try {
+            const buf = await readProfile();
+            const log = await flameprof(buf, 'log');
+            const svg = await flamegraph(log);
+            // The SVG is not "clean" and only really works on a separate page.
+            renderIframe('#graph', svg);
         } finally {
             setToolBusy(false);
         }
@@ -183,6 +201,17 @@ function registerHandlers() {
 function renderSvg(svg) {
     $('#graph').innerHTML = svg;
     $('#graph').style.display = 'block';
+}
+
+function renderIframe(where, content) {
+    $(where).innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.width = '100%';
+    iframe.height = '100%';
+    iframe.frameBorder = 0;
+    iframe.srcdoc = content;
+    $(where).appendChild(iframe);
+    $(where).style.display = 'block';
 }
 
 async function renderDot(dot) {
@@ -235,10 +264,10 @@ async function gprof2dot(buf, format) {
     }
 }
 
-async function flameprof(buf) {
+async function flameprof(buf, outFormat) {
     try {
         window.prof_buf = buf;
-        const svg = await pyodide.runPythonAsync(`
+        const out = await pyodide.runPythonAsync(`
             from tempfile import NamedTemporaryFile
             import io
             import pstats
@@ -253,19 +282,56 @@ async function flameprof(buf) {
 
                 result = io.StringIO()
                 flameprof.render(
-                    s.stats, result, 'svg', flameprof.DEFAULT_THRESHOLD / 100,
+                    s.stats, result, '${outFormat}', flameprof.DEFAULT_THRESHOLD / 100,
                     flameprof.DEFAULT_WIDTH, flameprof.DEFAULT_ROW_HEIGHT,
                     flameprof.DEFAULT_FONT_SIZE, flameprof.DEFAULT_LOG_MULT)
 
-            svg = result.getvalue()
-            svg
+            out = result.getvalue()
+            out
         `);
-        return svg;
+        return out;
     } catch (e) {
         window.alert('Error running flameprof:\n\n' + e.message)
         throw e;
     } finally {
         delete window.prof_buf;
+    }
+}
+
+let webperlDidRun = false;
+async function flamegraph(log) {
+    if (webperlDidRun) {
+        window.alert('Please reload the page to run FlameGraph again (limitation of WebPerl).');
+        throw Error('can only run WebPerl once');
+    }
+    const response = await fetch(FlameGraphPlUrl);
+    if (!response.ok) {
+        window.alert(`Error loading ${FlameGraphPlUrl}: ${response.status} ${response.statusText}`);
+        return;
+    }
+    const pl = await response.text();
+    try {
+        await new Promise(resolve => Perl.init(resolve));
+        webperlDidRun = true;
+        let svg = '';
+        Perl.output = (str, chan) => {
+            if (chan == 1) { // stdout
+                svg += str;
+            } else { // stderr
+                console.log(str);
+            }
+        };
+        const logPath = '/tmp/stats.log';
+        const plPath = '/tmp/flamegraph.pl';
+        FS.writeFile(logPath, log);
+        FS.writeFile(plPath, pl);
+        Perl.start([plPath, logPath]);
+        return svg;
+    } catch (e) {
+        window.alert('Error running FlameGraph:\n\n' + e.message)
+        throw e;
+    } finally {
+        Perl.end();
     }
 }
 

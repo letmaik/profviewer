@@ -57,6 +57,7 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
         <tr><td>Tools:</td><td>
             <button id="gprof2dot-btn">gprof2dot</button>
             <button id="flameprof-btn">flameprof</button>
+            <button id="flameprof-flamegraph-btn">flameprof+FlameGraph</button>
             <button id="table-btn">table</button>
             <span id="tool-progress"></span>
         </td></tr>
@@ -68,9 +69,17 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
 
 </div>
 
-<!-- TODO find something available as cjs/es module -->
-<script src="https://cdn.jsdelivr.net/npm/sorttable@1.0.2/sorttable.min.js"></script>
+<script>
+    // Work-around for https://github.com/jspm/project/issues/75.
+    window.__hpcc_wasmFolder = 'https://unpkg.com/@hpcc-js/wasm@0.3.14/dist/'
+</script>
 
+<!-- not available as cjs/es modules -->
+<script src="https://cdn.jsdelivr.net/npm/sorttable@1.0.2/sorttable.min.js"></script>
+<script src="https://webperlcdn.zero-g.net/v0.09-beta/webperl.js"></script>
+<script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>
+
+<!-- get access to new module features like import maps -->
 <script defer src="https://cdn.jsdelivr.net/npm/es-module-shims@0.5.0/dist/es-module-shims.min.js"></script>
 <script type="importmap-shim">
 {
@@ -82,13 +91,6 @@ table th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_no
     }
 }
 </script>
-
-<script>
-// Work-around for https://github.com/jspm/project/issues/75.
-window.__hpcc_wasmFolder = 'https://unpkg.com/@hpcc-js/wasm@0.3.14/dist/'
-</script>
-
-<script src="https://pyodide-cdn2.iodide.io/v0.15.0/full/pyodide.js"></script>
 
 <script type="module-shim">
 import { main } from "./js/main.js";
