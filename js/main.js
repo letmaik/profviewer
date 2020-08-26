@@ -215,6 +215,7 @@ function renderIframe(where, content) {
 }
 
 async function renderDot(dot) {
+    $('#graph').innerHTML = '';
     await new Promise(resolve => {
         graphviz("#graph")
             .options({width: '100%', height: 600, zoomScaleExtent: [0.1, 100], fit: true})
